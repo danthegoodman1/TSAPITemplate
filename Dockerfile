@@ -13,6 +13,6 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY --from=build /app/build /app/
-COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/node_modules /app/
 
-ENTRYPOINT ["node", "/app/index.js"]
+ENTRYPOINT ["node", "/app/build/index.js"]
