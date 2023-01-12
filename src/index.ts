@@ -16,7 +16,7 @@ async function main() {
   app.disable('x-powered-by')
 
   const log = bunyan.createLogger({
-    name: "StripeSQLAPI",
+    name: "tsapitemplate",
     serializers: bunyan.stdSerializers,
     level: 'debug'
   })
