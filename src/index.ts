@@ -4,6 +4,8 @@ dotenv.config()
 import express from 'express'
 import bunyan from 'bunyan'
 import { v4 as uuidv4 } from 'uuid'
+import cors from 'cors'
+
 import { logger } from './logger'
 import { ConnectDB } from './db'
 
@@ -14,6 +16,7 @@ async function main() {
   const app = express()
   app.use(express.json())
   app.disable('x-powered-by')
+  app.use(cors())
 
   const log = bunyan.createLogger({
     name: "tsapitemplate",

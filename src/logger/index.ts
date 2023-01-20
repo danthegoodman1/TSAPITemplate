@@ -1,21 +1,20 @@
-import winston from 'winston'
+import pino from 'pino'
 
-export const logger = winston.createLogger({
-  level: process.env.DEBUG === '1' ? 'debug' : 'info',
-  format: winston.format.json(),
-  // defaultMeta: { service: 'user-service' },
+export const logMsgKey = "msg"
+
+export const logger = pino(process.env.DEBUG === "1" ? {
+  transport: {
+    target: 'pino-pretty',
+  },
+  level: process.env.LOG_LEVEL || 'debug',
+
+} : {
+  level: process.env.LOG_LEVEL || 'info',
+  formatters: {
+    level: (label) => {
+      return {
+        [process.env.LOG_LEVEL_KEY || 'level']: label
+      }
+    }
+  }
 })
-
-if (process.env.ENV === "prod") {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.json(),
-    })
-  )
-} else {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.simple(),
-    })
-  )
-}
