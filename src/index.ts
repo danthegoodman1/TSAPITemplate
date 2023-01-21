@@ -11,6 +11,14 @@ import { ConnectDB } from './db'
 
 const listenPort = process.env.PORT || '8080'
 
+declare global {
+  namespace Express {
+    interface Request {
+      id: string
+    }
+  }
+}
+
 async function main() {
 
   const app = express()
@@ -35,7 +43,7 @@ async function main() {
 
   app.use((req: any, res, next) => {
     const reqID = uuidv4()
-    req.reqID = reqID
+    req.id = reqID
     req.log = log.child({ req_id: reqID }, true)
     req.log.info({ req })
     res.on("finish", () => req.log.info({ res }))
