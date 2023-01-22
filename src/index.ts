@@ -40,15 +40,21 @@ async function main() {
     process.exit(1)
   }
 
-
-  app.use((req: any, res, next) => {
+  app.use((req, res, next) => {
     const reqID = uuidv4()
     req.id = reqID
-    req.log = log.child({ req_id: reqID }, true)
-    req.log.info({ req })
-    res.on("finish", () => req.log.info({ res }))
     next()
   })
+
+  if (process.env.HTTP_LOG === "1") {
+    logger.debug("using HTTP logger")
+    app.use((req: any, res, next) => {
+      req.log = log.child({ req_id: req.id }, true)
+      req.log.info({ req })
+      res.on("finish", () => req.log.info({ res }))
+      next()
+    })
+  }
 
   app.get('/hc', (req, res) => {
     // let log = GetRequestLogger(req)
