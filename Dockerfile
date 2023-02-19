@@ -18,4 +18,4 @@ COPY --from=build /app/package-lock.json /app
 
 RUN npm ci --omit=dev
 
-ENTRYPOINT ["node", "/app/build/index.js"]
+ENTRYPOINT ["node", "/app/index.js"]
