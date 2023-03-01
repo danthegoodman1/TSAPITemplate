@@ -66,8 +66,6 @@ async function main() {
     res.sendStatus(200)
   })
 
-  app.post('/query')
-
   const server = app.listen(listenPort, () => {
     logger.info(`API listening on port ${listenPort}`)
   })
