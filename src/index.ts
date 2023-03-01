@@ -17,6 +17,12 @@ declare global {
       id: string
     }
   }
+
+  namespace NodeJS {
+    interface ProcessEnv {
+      API_TOKEN: string
+    }
+  }
 }
 
 async function main() {
