@@ -1,6 +1,4 @@
-import pino from 'pino'
-
-export const logMsgKey = "msg"
+import {pino} from "pino"
 
 export const logger = pino(process.env.DEBUG === "1" ? {
   transport: {
@@ -15,6 +13,7 @@ export const logger = pino(process.env.DEBUG === "1" ? {
       return {
         [process.env.LOG_LEVEL_KEY || 'level']: label
       }
-    }
-  }
+    },
+  },
+  messageKey: process.env.LOG_MSG_KEY || "message"
 })
