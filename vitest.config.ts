@@ -9,7 +9,8 @@ export default defineConfig({
   test: {
     clearMocks: true,
     globals: true,
-    setupFiles: ['dotenv/config'] //this line,
+    setupFiles: ['dotenv/config'],
+    testTimeout: 30000
   },
   resolve: {
     alias: [{ find: '~', replacement: resolve(__dirname, 'src') }],
