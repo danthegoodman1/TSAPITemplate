@@ -8,7 +8,7 @@
     "build": "tsc",
     "dev": "nodemon -r dotenv/config --exec ts-node-esm src/index.ts",
     "start": "node -r dotenv/config build/index.js",
-    "test": "jest --setupFiles dotenv/config",
+    "test": "vitest",
     "start:docker": "node -r dotenv/config index.js"
   },
   "keywords": [],
