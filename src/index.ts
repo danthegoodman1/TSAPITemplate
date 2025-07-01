@@ -15,12 +15,14 @@ declare global {
   namespace Express {
     interface Request {
       id: string
+      log: typeof logger
     }
   }
 
   namespace NodeJS {
     interface ProcessEnv {
       API_TOKEN: string
+      HTTP_LOG: string
     }
   }
 }
@@ -29,35 +31,62 @@ async function main() {
 
   const app = express()
   app.use(express.json())
-  app.disable('x-powered-by')
+  app.disable("x-powered-by")
   app.use(cors())
 
-  // Connect DB
-  try {
-    await ConnectDB()
-  } catch (error: any) {
-    logger.error({ err: extractError(error) }, "failed to connect to db")
-    process.exit(1)
-  }
-
-  app.use((req, res, next) => {
+  app.use((req: any, res: any, next: any) => {
     const reqID = uuidv4()
     req.id = reqID
-    res.header('X-Request-ID', reqID)
+    req.log = logger.child({ requestId: reqID })
+    res.header("X-Request-ID", req.id)
     next()
   })
 
   if (process.env.HTTP_LOG === "1") {
-    logger.debug("using HTTP logger")
     app.use((req: any, res, next) => {
-      req.log.info({ req })
-      res.on("finish", () => req.log.info({ res }))
+      const startTime = Date.now()
+
+      // Log request details
+      req.log.info({
+        type: "request",
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        bodyLength: req.get("content-length")
+          ? parseInt(req.get("content-length")!)
+          : 0,
+        userAgent: req.get("user-agent"),
+        ip: req.ip,
+      })
+
+      // Log response details when finished
+      res.on("finish", () => {
+        const duration = Date.now() - startTime
+        const contentLength = res.get("content-length")
+        req.log.info({
+          type: "response",
+          statusCode: res.statusCode,
+          headers: res.getHeaders(),
+          bodyLength: contentLength ? parseInt(contentLength) : 0,
+          duration: `${duration}ms`,
+        })
+      })
+
       next()
     })
   }
 
-  app.get('/hc', (req, res) => {
+  app.get("/hc", (_req, res) => {
     res.sendStatus(200)
+  })
+
+  app.use((err: any, req: any, res: any, _next: any) => {
+    // if (err instanceof ZodError) {
+    //   return res.status(400).send(`Invalid body: ${err.message}`)
+    // }
+
+    logger.error({ err: extractError(err), id: req.id })
+    res.status(500).send("Internal Server Error")
   })
 
   const server = app.listen(listenPort, () => {
@@ -78,7 +107,8 @@ async function main() {
       }
       stopping = true
       logger.info(`Received signal ${signal}, shutting down...`)
-      logger.info("exiting...")
+      logger.flush() // pino actually fails to flush, even with awaiting on a callback
+      server.close()
       process.exit(0)
     })
   })
